@@ -45,6 +45,50 @@ func main(){
 
 ```
 
+
+
+# 高级使用 LogItem
+一个适合从入口函数开始传到各个处理函数的日志块  
+很多时候由于并行处理，导致日志循序混乱无法定位具体日志关联性
+
+demo
+```go
+// 生成一个随机字符串当作日志的ID
+logi:=log.ID(log.CreateID())
+// 设置tag
+logi.Tag("login")
+logi.Info("username:????,pwd:???????")
+// 释放对象
+logi.Free()
+
+
+// 支持链式调用
+log.ID(log.CreateID()).Tag("request").Info("POST","http://127.0.0.1").Free()
+```
+
+并发使用
+```go
+func runTask(logi *log.LogItem){
+    for i:=0;i<1000;i++{
+        time.Sleep(time.Second)
+        logi.Info("do",i)
+    }
+    logi.Free()
+}
+
+
+func main(){
+    for i:=0;i<4;i++{
+        logi:=log.ID(log.CreateID())
+        logi.Info("start",i)
+        go runTask(logi)
+    }
+    time.Sleep(time.Hour)
+}
+
+```
+
+
 # 存到文件并进行日志自动分割
 
 任何实现了`io.Writer`接口的都可以被当作日志的输出源  
