@@ -127,6 +127,4 @@ conn,err:=net.Dial("tcp","127.0.0.1:8888")
 log.SetOutput(conn)
 ```
 
-# 上报到日志平台(skynet)
 
-todo 稍后添加

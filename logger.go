@@ -12,10 +12,9 @@ import (
 )
 
 type Logger struct {
-	mu     sync.RWMutex
-	out    io.Writer
-	level  Level
-	upload bool
+	mu    sync.RWMutex
+	out   io.Writer
+	level Level
 }
 
 var bufpool = &sync.Pool{New: func() interface{} {
@@ -88,12 +87,10 @@ func formatHeader(buf *bytes.Buffer, t time.Time, level Level, tag, id, file str
 // 格式化消息
 func (log *Logger) Output(calldept int, level Level, tag, id, msg string) error {
 	log.mu.RLock()
-	iswrite := level >= log.level
-	// 是否允许上传日志
-	isupload := log.upload
+	allow := level >= log.level
 	log.mu.RUnlock()
 	// 等级不足以输出
-	if !iswrite {
+	if !allow {
 		return nil
 	}
 	buf := bufpool.Get().(*bytes.Buffer)
@@ -115,14 +112,9 @@ func (log *Logger) Output(calldept int, level Level, tag, id, msg string) error 
 	if len(msg) == 0 || msg[len(msg)-1] != '\n' {
 		buf.WriteByte('\n')
 	}
-
 	log.mu.Lock()
 	_, err := log.out.Write(buf.Bytes())
 	log.mu.Unlock()
-	// 需要上传的话异步发送上传队列
-	if isupload {
-		//todo
-	}
 	bufpool.Put(buf)
 	return err
 
