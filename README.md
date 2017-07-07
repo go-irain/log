@@ -30,6 +30,7 @@ new log for skynet
 * Warnning 警告
 * Info 信息
 * Debug 调试信息 建议生产环境关闭
+* Alarm 报警 此日志触发报警
 
 # 基本使用
 

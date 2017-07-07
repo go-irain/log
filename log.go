@@ -59,6 +59,7 @@ const (
 	L_Info
 	L_Warnning
 	L_Error
+	L_Alarm
 )
 
 const (
@@ -77,6 +78,8 @@ func (l Level) String() string {
 		return "WARN"
 	case L_Error:
 		return "ERRO"
+	case L_Alarm:
+		return "ALRM"
 	default:
 		return "UNKN"
 	}
@@ -120,6 +123,10 @@ func Error(s ...interface{}) {
 	std.Output(2, L_Error, "", "", fmt.Sprintln(s...))
 }
 
+func Alarm(s ...interface{}) {
+	std.Output(2, L_Alarm, "", "", fmt.Sprintln(s...))
+}
+
 //
 
 func Debugf(s string, args ...interface{}) {
@@ -136,4 +143,8 @@ func Warnningf(s string, args ...interface{}) {
 
 func Errorf(s string, args ...interface{}) {
 	std.Output(2, L_Error, "", "", fmt.Sprintf(s, args...))
+}
+
+func Alarmf(s string, args ...interface{}) {
+	std.Output(2, L_Alarm, "", "", fmt.Sprintf(s, args...))
 }
