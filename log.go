@@ -22,7 +22,7 @@
 // 	fileio, err := log.NewLogFile(&log.FileOption{
 // 		Dir:          "./logs",
 // 		MaxFileCount: 4,
-// 		MaxFileSize:  10 * log.MB,
+// 		MaxFileSize:  10 ,
 // 	})
 // 	if err != nil {
 // 		panic(err)
@@ -62,9 +62,9 @@ const (
 )
 
 const (
-	_  uint64 = iota
-	KB uint64 = 1 << (10 * iota)
-	MB
+	_      uint64 = iota
+	sizeKB uint64 = 1 << (10 * iota)
+	sizeMB
 )
 
 func (l Level) String() string {

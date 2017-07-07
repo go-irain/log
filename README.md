@@ -103,7 +103,7 @@ demo
 opt:=&log.FileOption{
     Dir : "./", // 日志路径，可以绝对，可以相对
     MaxFileCount : 10, // 最大保存文件数量
-    MaxFileSize : 200*log.MB, // 单个文件最大大小
+    MaxFileSize : 200, // 单个文件最大大小 单位MB
 }
 
 

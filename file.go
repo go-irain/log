@@ -5,8 +5,8 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
-	"strconv"
 	"strings"
+	"time"
 )
 
 // 实现io.Writer
@@ -22,10 +22,16 @@ type LogFile struct {
 type FileOption struct {
 	Dir          string
 	MaxFileCount int
-	MaxFileSize  uint64
+	MaxFileSize  uint64 // 单位MB
 }
 
 func NewLogFile(opt *FileOption) (*LogFile, error) {
+	if opt.MaxFileCount < 0 {
+		opt.MaxFileCount = 0
+	}
+	if opt.MaxFileSize != 0 {
+		opt.MaxFileSize = opt.MaxFileSize * sizeMB
+	}
 	opt.Dir, _ = filepath.Abs(strings.TrimSuffix(opt.Dir, "/"))
 	f := &LogFile{
 		option: opt,
@@ -50,10 +56,10 @@ func (f *LogFile) Write(data []byte) (int, error) {
 }
 
 // 获取目录下指定前缀的所有日志文件
-func (f *LogFile) getFiles() []string {
+func (f *LogFile) removeFiles() {
 	fs, err := filepath.Glob(fmt.Sprintf("%s/%s.log.*", f.option.Dir, ServiceName))
 	if err != nil {
-		return []string{}
+		return
 	}
 	sort.Strings(fs)
 	x := len(fs) - (f.option.MaxFileCount - 1)
@@ -62,19 +68,16 @@ func (f *LogFile) getFiles() []string {
 		for _, v := range dels {
 			os.Remove(v)
 		}
-		fs = fs[x:]
 	}
-	return fs
 }
 
 // 分割
 func (f *LogFile) rotate() error {
-	fs := f.getFiles()
+	f.removeFiles()
 	if f.fd != nil {
 		f.fd.Sync()
 		f.fd.Close()
-		index := f.getLastIndex(fs)
-		os.Rename(f.name, fmt.Sprintf("%s.%08d", f.name, index))
+		os.Rename(f.name, f.name+time.Now().Format(".20060102150405"))
 	}
 	fmt.Println("log rotate")
 	// 创建最新的日志文件
@@ -89,13 +92,4 @@ func (f *LogFile) rotate() error {
 	f.fd = fd
 	f.rsize = uint32(fi.Size())
 	return nil
-}
-
-func (f *LogFile) getLastIndex(fs []string) int {
-	if len(fs) == 0 {
-		return 0
-	}
-	last := fs[len(fs)-1]
-	n, _ := strconv.Atoi(last[len(last)-8:])
-	return n + 1
 }
